@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satyam Ads App</title> <!-- Changed App Title -->
+    
+    <!-- Aapka Naya Ad Code -->
+  <script src='//libtl.com/sdk.js' data-zone='9887286' data-sdk='show_9887286'></script>
+    
+    <!-- IMPORTANT: In production, consider compiling Tailwind CSS instead of using CDN for better performance -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #ffffff; }
+        .dark-bg { background-color: #121212; }
+        .card-bg { background-color: #1e1e1e; }
+        .border-accent { border-color: #ff8c00; }
+        .text-accent { color: #ff8c00; }
+        .btn, .btn-accent, .btn-outline-accent { transition: all 0.2s ease-in-out; transform: scale(1); }
+        .btn:active, .btn-accent:active, .btn-outline-accent:active { transform: scale(0.95); }
+        .btn-accent { background-color: #ff8c00; color: #121212; font-weight: bold; }
+        .btn-accent:hover { background-color: #e67e00; }
+        .btn-outline-accent { border: 1px solid #ff8c00; color: #ff8c00; }
+        .btn-outline-accent:hover { background-color: #ff8c00; color: #121212; }
+        .input-field { background-color: #2c2c2c; border: 1px solid #444; }
+        .main-page { display: none; }
+        .main-page.active { display: flex; animation: fadeIn 0.5s ease-in-out; }
+        .sub-page { display: none; }
+        .sub-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        .bottom-nav a.active { color: #ff8c00; }
+        .notification-dot {
+            position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
+            background-color: #ef4444; border-radius: 50%; border: 2px solid #121212; display: none;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Transaction History Specific Styles - REMOVED */
+
+        /* Social Media Icon Styling - All icons (Lucide and Images) will use w-10 h-10 which is 40x40px */
+        .social-icon-display {
+            width: 40px; 
+            height: 40px; 
+            object-fit: contain; /* Ensures the entire image is visible without cropping */
+            transition: transform 0.2s ease-in-out;
+        }
+        .social-icon-display:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="max-w-md mx-auto">
+
+    <!-- App Loader -->
+    <div id="loader" class="hidden fixed inset-0 dark-bg bg-opacity-75 flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent"></div>
+    </div>
+
+    <!-- Authentication Section -->
+    <div id="auth-section" class="min-h-screen p-6 flex-col justify-center main-page">
+        <h1 class="text-4xl font-bold text-center mb-2 text-accent">Satyam Ads</h1> <!-- Changed App Name -->
+        <p class="text-center text-gray-400 mb-8">Jaari rakhne ke liye Login ya Signup karein</p>
+        <div id="auth-container">
+            <div id="login-view">
+                <input id="login-email" type="email" placeholder="Email" class="w-full p-3 rounded-lg input-field mb-4">
+                <input id="login-password" type="password" placeholder="Password" class="w-full p-3 rounded-lg input-field mb-4">
+                <button id="login-btn" class="w-full p-3 rounded-lg btn-accent mb-4">Login</button>
+                <p class="text-center text-gray-400">Account nahi hai? <a href="#" id="show-signup" class="font-semibold text-accent">Sign Up</a></p>
+            </div>
+            <div id="signup-view" class="hidden">
+                 <input id="signup-name" type="text" placeholder="Poora Naam" class="w-full p-3 rounded-lg input-field mb-4">
+                <input id="signup-email" type="email" placeholder="Email" class="w-full p-3 rounded-lg input-field mb-4">
+                <input id="signup-password" type="password" placeholder="Password" class="w-full p-3 rounded-lg input-field mb-4">
+                <button id="signup-btn" class="w-full p-3 rounded-lg btn-accent mb-4">Sign Up</button>
+                <p class="text-center text-gray-400">Pehle se account hai? <a href="#" id="show-login" class="font-semibold text-accent">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="min-h-screen flex-col main-page">
+        <header class="flex items-center justify-between p-4 sticky top-0 bg-opacity-80 backdrop-blur-md z-10 dark-bg">
+            <h1 class="text-xl font-bold">Satyam Ads</h1> <!-- Changed App Name -->
+            <div class="flex items-center space-x-4">
+                <div id="notification-bell" class="relative cursor-pointer">
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                    <div id="notification-dot" class="notification-dot"></div>
+                </div>
+                <i data-lucide="user" class="w-6 h-6 cursor-pointer" onclick="navigateTo('profile-page')"></i>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            <!-- Home Page -->
+            <div id="home-page" class="p-4 space-y-6 sub-page">
+                <div class="card-bg p-4 rounded-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Your Balance</p>
+                        <p class="text-3xl font-bold"><span id="coin-balance">0</span> Coins</p>
+                    </div>
+                    <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg">Withdraw</button>
+                </div>
+                <section>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-semibold">Daily Tasks</h2>
+                            <p class="text-sm text-gray-400 mb-4">Complete tasks to get rewards.</p>
+                        </div>
+                        <p class="text-sm text-gray-400">Ads Left: <span id="ads-left-count">...</span></p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-orange-500 p-3 rounded-lg flex items-center justify-between text-black">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">&#128250;</span><div><h3 class="font-bold">Watch Short Ad</h3><p class="text-xs font-medium">Rewarded Interstitial</p></div></div>
+                            <button class="bg-white text-orange-500 font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('interstitial')">Claim</button>
+                        </div>
+                        
+                         <div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">&#128250;</span><div><h3 class="font-semibold">Watch a Video</h3><p class="text-xs text-gray-400">In-App Interstitial</p></div></div>
+                            <button class="bg-gray-700 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('inApp')">Start</button>
+                        </div>
+                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">&#127918;</span><div><h3 class="font-semibold">Play Mini App</h3><p class="text-xs text-gray-400">Get a big reward!</p></div></div>
+                            <button class="bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('miniApp')">Play</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Wallet Page - Updated Structure -->
+            <div id="wallet-page" class="p-4 space-y-6 sub-page">
+                <h2 class="text-xl font-bold text-center">Mera Wallet</h2>
+                
+                <!-- Top Balance and Info Card -->
+                <div class="card-bg p-4 rounded-lg">
+                    <div>
+                        <p class="text-gray-400 text-sm">Apka Total Balance</p>
+                        <p class="text-4xl font-bold mb-3"><span id="wallet-coin-balance">0</span> Coins</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400 mb-1 font-semibold" id="coin-value-info">...</p>
+                        <p class="text-sm text-gray-400 mb-2">Minimum Withdrawal: <span id="min-withdrawal-info">...</span> Coins</p>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Section -->
+                <div class="card-bg p-4 rounded-lg">
+                    <h3 class="font-semibold mb-3">Coins Withdraw Karein</h3>
+                    <input id="withdraw-amount" type="number" placeholder="Coin amount daalein" class="w-full p-3 rounded-lg input-field mb-3">
+                    <select id="withdraw-method" class="w-full p-3 rounded-lg input-field mb-3"></select>
+                    <div id="payment-details-container"></div>
+                    <button id="withdraw-btn" class="w-full p-3 rounded-lg btn-accent mt-3">Request Withdrawal</button>
+                </div>
+
+                <!-- Transaction History Section - REMOVED -->
+            </div>
+
+            <!-- Refer Page -->
+            <div id="refer-page" class="p-4 space-y-6 sub-page">
+                 <!-- Image for Refer & Earn (Heading removed) -->
+                 <img src="https://i.postimg.cc/jqQrxz6m/friend-referral-promotion-vector-30210808.jpg" alt="Referral Promotion" class="mx-auto w-full max-w-sm rounded-lg mb-6">
+
+                 <div class="card-bg p-6 rounded-lg text-center">
+                     <p class="text-gray-400 mb-2">Aapka Referral Code</p>
+                     <div class="bg-gray-800 p-3 rounded-lg flex items-center justify-center mb-4">
+                         <span id="referral-code" class="text-2xl font-bold tracking-widest">LOADING...</span>
+                         <button id="copy-code-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
+                     </div>
+                     <p class="text-sm text-gray-300">Apne dosto ke saath code share karein.</p>
+                 </div>
+                 
+                 <!-- Generic Share Button (will use Web Share API) -->
+                 <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">Apna Code Share Karein</button>
+
+                 <!-- Social Media Share Logos -->
+                 <div class="flex justify-center space-x-6 mt-6">
+                     <a href="#" id="share-whatsapp" class="">
+                         <img src="https://i.postimg.cc/GpZdGSmw/IMG-20250920-160527.png" alt="WhatsApp" class="social-icon-display">
+                     </a>
+                     <a href="#" id="share-instagram" class="">
+                         <img src="https://i.postimg.cc/Tw2HTHV3/IMG-20250920-140956.png" alt="Instagram" class="social-icon-display">
+                     </a>
+                     <a href="#" id="share-telegram" class="">
+                         <img src="https://i.postimg.cc/d3ZHtd5C/5853-removebg-preview.png" alt="Telegram" class="social-icon-display">
+                     </a>
+                 </div>
+
+                 <div class="card-bg p-4 rounded-lg mt-6">
+                    <h3 class="font-semibold mb-3 text-center">Kisi ka Referral Code Hai?</h3>
+                    <input id="enter-referral-code" type="text" placeholder="Yahan code daalein" class="w-full p-3 rounded-lg input-field mb-3">
+                    <button id="apply-referral-btn" class="w-full p-3 rounded-lg btn-outline-accent">Code Apply Karein</button>
+                 </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="p-4 space-y-6 sub-page">
+                <h2 class="text-xl font-bold text-center mb-4">Profile</h2>
+                <div class="flex flex-col items-center card-bg p-6 rounded-lg">
+                    <!-- Profile DP with first letter -->
+                    <img id="profile-pic" src="https://placehold.co/100x100/1e1e1e/ff8c00?text=U" class="rounded-full mb-4 w-24 h-24 object-cover">
+                    <h2 id="profile-name" class="text-2xl font-bold mb-1">User Name</h2>
+                    <p id="profile-email" class="text-gray-400 text-sm mb-4">user@email.com</p>
+
+                    <div class="w-full text-left space-y-2 mt-4">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                            <span class="text-gray-300">Apka Referral Code:</span>
+                            <span id="profile-referral-code" class="font-semibold text-accent">LOADING...</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                            <span class="text-gray-300">Total Coins:</span>
+                            <span id="profile-total-coins" class="font-semibold text-white">0</span>
+                        </div>
+                        <!-- New: Ads Watched -->
+                        <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                            <span class="text-gray-300">Total Ads Watched:</span>
+                            <span id="profile-total-ads-watched" class="font-semibold text-white">0</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-300">Joined On:</span>
+                            <span id="profile-joined-date" class="font-semibold text-white">N/A</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Media Links - Moved here, above logout button -->
+                <div class="flex justify-center space-x-6 mt-6 w-full pt-4 border-t border-gray-700">
+                    <!-- Social Media Links - Using updated image icons -->
+                    <a id="link-youtube" href="#" target="_blank" class="hidden">
+                        <img src="https://i.postimg.cc/7PWQy9fq/IMG-20250920-141014.png" alt="YouTube" class="social-icon-display">
+                    </a>
+                    <a id="link-instagram" href="#" target="_blank" class="hidden">
+                        <img src="https://i.postimg.cc/Tw2HTHV3/IMG-20250920-140956.png" alt="Instagram" class="social-icon-display">
+                    </a>
+                    <a id="link-facebook" href="#" target="_blank" class="hidden">
+                        <img src="https://i.postimg.cc/R0BDD0qf/IMG-20250920-140904.png" alt="Facebook" class="social-icon-display">
+                    </a>
+                    <a id="link-telegram" href="#" target="_blank" class="hidden">
+                        <img src="https://i.postimg.cc/d3ZHtd5C/5853-removebg-preview.png" alt="Telegram" class="social-icon-display">
+                    </a>
+                </div>
+
+                <button id="logout-btn" class="w-full mt-6 p-3 rounded-lg bg-red-600 text-white font-bold">Logout</button>
+            </div>
+            
+            <!-- Notifications Page -->
+            <div id="notifications-page" class="p-4 space-y-4 sub-page">
+                <h2 class="text-xl font-bold text-center">Notifications</h2>
+                <div id="notifications-list" class="space-y-3"></div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav sticky bottom-0 grid grid-cols-4 items-center text-center py-2 card-bg">
+            <a href="#" class="nav-link" data-page="home-page"><i data-lucide="home" class="mx-auto w-6 h-6"></i><span class="text-xs">Home</span></a>
+            <a href="#" class="nav-link" data-page="wallet-page"><i data-lucide="wallet" class="mx-auto w-6 h-6"></i><span class="text-xs">Wallet</span></a>
+            <a href="#" class="nav-link" data-page="refer-page"><i data-lucide="users" class="mx-auto w-6 h-6"></i><span class="text-xs">Refer & Earn</span></a>
+            <a href="#" class="nav-link" data-page="profile-page"><i data-lucide="user" class="mx-auto w-6 h-6"></i><span class="text-xs">Profile</span></a>
+        </nav>
+    </div>
+    
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center">
+            <p id="alert-message" class="mb-4"></p>
+            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg">OK</button>
+        </div>
+    </div>
+
+    <script type="module">
+        const firebaseConfig = {
+          apiKey: "AIzaSyBaacddGvpLd2gvf51m3MNxM9-1ykJ-uRw",
+          authDomain: "telegram-mini-62d68.firebaseapp.com",
+          databaseURL: "https://telegram-mini-62d68-default-rtdb.firebaseio.com",
+          projectId: "telegram-mini-62d68",
+          storageBucket: "telegram-mini-62d68.firebasestorage.app",
+          messagingSenderId: "120683332622",
+          appId: "1:120683332622:web:fc1bd08cdcb839c991685f",
+          measurementId: "G-7SF31V9V6Q"
+        };
+        
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userData = null;
+        let appConfig = {};
+
+        const loader = document.getElementById('loader');
+        const coinBalanceEl = document.getElementById('coin-balance');
+        const walletCoinBalanceEl = document.getElementById('wallet-coin-balance');
+        const profileNameEl = document.getElementById('profile-name');
+        const profileEmailEl = document.getElementById('profile-email');
+        const referralCodeEl = document.getElementById('referral-code');
+        const minWithdrawalInfoEl = document.getElementById('min-withdrawal-info');
+        const coinValueInfoEl = document.getElementById('coin-value-info');
+        const withdrawMethodSelect = document.getElementById('withdraw-method');
+        const notificationDot = document.getElementById('notification-dot');
+        const adsLeftCountEl = document.getElementById('ads-left-count');
+        const paymentDetailsContainer = document.getElementById('payment-details-container');
+        const profileTotalAdsWatchedEl = document.getElementById('profile-total-ads-watched'); // New element
+        const profilePicEl = document.getElementById('profile-pic'); // Profile picture element
+
+        window.onload = () => {
+            lucide.createIcons(); // Still needed for bottom nav icons and refer page share buttons
+            setupEventListeners();
+            showMainPage('auth-section');
+            loader.style.display = 'none';
+            onAuthStateChanged(auth, handleAuthStateChange);
+        };
+
+        async function handleAuthStateChange(user) {
+            if (user) {
+                loader.style.display = 'flex';
+                currentUser = user;
+                await fetchUserData();
+                
+                if (!userData) {
+                    showAlert("User data load karne mein error aayi. Kripya network connection check karein ya security rules sahi karein.");
+                    await signOut(auth);
+                    loader.style.display = 'none';
+                    return;
+                }
+
+                if (userData.isBlocked) {
+                    showAlert("Aapka account block kar diya gaya hai.");
+                    await signOut(auth);
+                    loader.style.display = 'none';
+                    return;
+                }
+                await fetchAppConfig();
+                await checkNewNotifications();
+                updateUI();
+                showMainPage('app-container');
+                navigateTo('home-page');
+                loader.style.display = 'none';
+            } else {
+                currentUser = null;
+                userData = null;
+                showMainPage('auth-section');
+            }
+        }
+
+        async function fetchUserData() {
+            if (!currentUser) return;
+            const userRef = doc(db, "users", currentUser.uid);
+            try {
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    userData = userSnap.data();
+                } else {
+                    const ownReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const defaultUserData = {
+                        uid: currentUser.uid, 
+                        name: currentUser.email.split('@')[0], 
+                        email: currentUser.email,
+                        balance: 50, 
+                        referralCode: ownReferralCode, 
+                        referredBy: null,
+                        lastNotificationCheck: serverTimestamp(), 
+                        createdAt: serverTimestamp(),
+                        adsWatchedToday: 0, 
+                        lastAdWatchTimestamp: null, 
+                        isBlocked: false,
+                        totalAdsWatched: 0 
+                    };
+                    await setDoc(userRef, defaultUserData);
+                    userData = defaultUserData;
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                showAlert("User data load karne mein error aayi. Kripya network connection check karein ya security rules sahi karein.");
+                userData = null;
+            }
+        }
+
+        async function fetchAppConfig() {
+            const configRef = doc(db, "config", "main");
+            try {
+                const configSnap = await getDoc(configRef);
+                appConfig = configSnap.exists() ? configSnap.data() : {
+                    minWithdrawal: 5000,
+                    paymentMethods: ["UPI", "Paytm"],
+                    dailyAdLimit: 10,
+                    coinValueCoins: 1000, 
+                    coinValueInr: 10,      
+                    interstitialAdReward: 50,
+                    inAppAdReward: 20,
+                    miniAppAdReward: 100,
+                    youtubeLink: "", 
+                    instagramLink: "", 
+                    facebookLink: "",  
+                    telegramLink: ""   
+                };
+                // Set the default Telegram channel link here if not already set in config
+                if (!appConfig.telegramLink) {
+                    appConfig.telegramLink = "https://t.me/hackingwithvivek"; 
+                }
+                // Also setting generic links for other social links if not present in config
+                if (!appConfig.youtubeLink) appConfig.youtubeLink = "https://www.youtube.com/"; 
+                if (!appConfig.instagramLink) appConfig.instagramLink = "https://www.instagram.com/"; 
+                if (!appConfig.facebookLink) appConfig.facebookLink = "https://www.facebook.com/"; 
+
+            } catch (error) {
+                console.error("Error fetching app config:", error);
+                showAlert("App configuration load karne mein error aayi. Kripya network connection check karein.");
+            }
+        }
+        
+        function updateUI() {
+            if (!userData) return;
+            const balance = userData.balance || 0;
+            coinBalanceEl.textContent = balance;
+            walletCoinBalanceEl.textContent = balance;
+            profileNameEl.textContent = userData.name || 'No Name';
+            profileEmailEl.textContent = userData.email || 'No Email';
+
+            // Update profile picture with first letter
+            const userName = userData.name || 'User';
+            const firstLetter = userName.charAt(0).toUpperCase();
+            profilePicEl.src = `https://placehold.co/100x100/1e1e1e/ff8c00?text=${firstLetter}`;
+
+            referralCodeEl.textContent = userData.referralCode || '...';
+            minWithdrawalInfoEl.textContent = `${appConfig.minWithdrawal || 5000} Coins`;
+            
+            const baseCoins = Number(appConfig.coinValueCoins) || 1000;
+            const baseInr = Number(appConfig.coinValueInr) || 10;
+
+            let inrPer100Coins = 0;
+            if (baseCoins > 0) {
+                inrPer100Coins = (baseInr / baseCoins) * 100;
+            }
+            
+            coinValueInfoEl.innerHTML = `100 Coins = &#8377;${inrPer100Coins.toFixed(2)}`;
+
+            withdrawMethodSelect.innerHTML = '';
+            (appConfig.paymentMethods || []).forEach(method => {
+                const option = document.createElement('option');
+                option.value = method;
+                option.textContent = method;
+                withdrawMethodSelect.appendChild(option);
+            });
+            updateDynamicPaymentFields();
+            updateAdsLeftCount(); 
+
+            document.getElementById('profile-referral-code').textContent = userData.referralCode || 'N/A';
+            document.getElementById('profile-total-coins').textContent = balance;
+            profileTotalAdsWatchedEl.textContent = userData.totalAdsWatched || 0; 
+            if (userData.createdAt && userData.createdAt.toDate) {
+                document.getElementById('profile-joined-date').textContent = userData.createdAt.toDate().toLocaleDateString();
+            } else {
+                document.getElementById('profile-joined-date').textContent = 'N/A';
+            }
+
+            // Social media links setup (using image icons now)
+            const socialLinks = {
+                youtube: document.getElementById('link-youtube'),
+                instagram: document.getElementById('link-instagram'),
+                facebook: document.getElementById('link-facebook'),
+                telegram: document.getElementById('link-telegram')
+            };
+
+            // Set actual URLs for social media
+            if (appConfig.youtubeLink) {
+                socialLinks.youtube.href = appConfig.youtubeLink;
+                socialLinks.youtube.classList.remove('hidden');
+            } else {
+                socialLinks.youtube.classList.add('hidden');
+            }
+
+            if (appConfig.instagramLink) {
+                socialLinks.instagram.href = appConfig.instagramLink;
+                socialLinks.instagram.classList.remove('hidden');
+            } else {
+                socialLinks.instagram.classList.add('hidden');
+            }
+
+            if (appConfig.facebookLink) {
+                socialLinks.facebook.href = appConfig.facebookLink;
+                socialLinks.facebook.classList.remove('hidden');
+            } else {
+                socialLinks.facebook.classList.add('hidden');
+            }
+
+            if (appConfig.telegramLink) {
+                socialLinks.telegram.href = appConfig.telegramLink;
+                socialLinks.telegram.classList.remove('hidden');
+            } else {
+                socialLinks.telegram.classList.add('hidden');
+            }
+        }
+
+        function updateAdsLeftCount() {
+            if (!userData) return;
+            const dailyAdLimit = appConfig.dailyAdLimit || 10;
+            const now = new Date();
+            const currentDayUTC = now.toISOString().split('T')[0];
+            
+            let effectiveAdsWatchedToday = 0;
+            const lastAdWatchTimestamp = userData.lastAdWatchTimestamp;
+
+            if (lastAdWatchTimestamp && lastAdWatchTimestamp.toDate) { 
+                const lastWatchDate = lastAdWatchTimestamp.toDate();
+                const lastWatchDayUTC = lastWatchDate.toISOString().split('T')[0];
+                
+                if (lastWatchDayUTC === currentDayUTC) {
+                    effectiveAdsWatchedToday = userData.adsWatchedToday || 0;
+                }
+            }
+            
+            const adsLeft = Math.max(0, dailyAdLimit - effectiveAdsWatchedToday);
+            adsLeftCountEl.textContent = adsLeft;
+        }
+
+        function updateDynamicPaymentFields() {
+            const selectedMethod = withdrawMethodSelect.value.toLowerCase();
+            let placeholder = "Detail Daalein";
+            if (selectedMethod.includes('upi')) placeholder = "Apni UPI ID Daalein";
+            if (selectedMethod.includes('paytm')) placeholder = "Apna Paytm Number Daalein";
+            paymentDetailsContainer.innerHTML = `<input id="payment-detail-input" type="text" placeholder="${placeholder}" class="w-full p-3 rounded-lg input-field">`;
+        }
+
+        function showMainPage(pageId) {
+            document.querySelectorAll('.main-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.bottom-nav .nav-link').forEach(link => { 
+                link.classList.remove('active', 'text-accent');
+                if (link.dataset.page === pageId) link.classList.add('active', 'text-accent');
+            });
+        }
+        window.navigateTo = navigateTo; 
+
+        function setupEventListeners() {
+            document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-view').classList.add('hidden'); document.getElementById('signup-view').classList.remove('hidden'); });
+            document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-view').classList.add('hidden'); document.getElementById('login-view').classList.remove('hidden'); });
+            document.getElementById('signup-btn').addEventListener('click', handleSignup);
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.querySelectorAll('.bottom-nav .nav-link').forEach(link => { 
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.dataset.page;
+                    navigateTo(pageId); 
+                });
+            });
+            document.getElementById('notification-bell').addEventListener('click', () => { navigateTo('notifications-page'); loadNotifications(); });
+            document.getElementById('copy-code-btn').addEventListener('click', copyReferralCode);
+            document.getElementById('share-btn').addEventListener('click', shareReferralCode); // Generic share button
+            document.getElementById('share-whatsapp').addEventListener('click', (e) => { e.preventDefault(); shareViaWhatsApp(); });
+            document.getElementById('share-instagram').addEventListener('click', (e) => { e.preventDefault(); shareViaInstagram(); });
+            document.getElementById('share-telegram').addEventListener('click', (e) => { e.preventDefault(); shareViaTelegram(); });
+            document.getElementById('withdraw-btn').addEventListener('click', handleWithdrawal);
+            document.getElementById('home-withdraw-btn').addEventListener('click', () => navigateTo('wallet-page'));
+            document.getElementById('apply-referral-btn').addEventListener('click', handleApplyReferralCode);
+            withdrawMethodSelect.addEventListener('change', updateDynamicPaymentFields);
+        }
+
+        async function handleSignup() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            if (!name || !email || !password) return showAlert("Kripya sabhi fields bharein.");
+            loader.style.display = 'flex';
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                showAlert(error.message);
+                loader.style.display = 'none';
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) return showAlert("Kripya email aur password daalein.");
+            loader.style.display = 'flex';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                showAlert(error.message);
+                loader.style.display = 'none';
+            }
+        }
+
+        async function handleLogout() { await signOut(auth); }
+        
+        async function checkNewNotifications() {
+            if (!userData || !userData.lastNotificationCheck) {
+                console.log("lastNotificationCheck is not valid or not set. Skipping notification check.");
+                return;
+            }
+            const lastCheckTimestamp = userData.lastNotificationCheck;
+            
+            const q = query(collection(db, "notifications"), where("createdAt", ">", lastCheckTimestamp), limit(1));
+            try {
+                const querySnapshot = await getDocs(q);
+                notificationDot.style.display = querySnapshot.empty ? 'none' : 'block';
+            }
+            catch (error) {
+                console.error("Error checking for new notifications:", error);
+            }
+        }
+
+        async function loadNotifications() {
+            const listEl = document.getElementById('notifications-list');
+            listEl.innerHTML = '<p class="text-gray-400">Loading...</p>';
+            notificationDot.style.display = 'none';
+            const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
+            try {
+                const querySnapshot = await getDocs(q);
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="text-gray-400 text-center">Koi notifications nahi hain.</p>';
+                    return;
+                }
+                listEl.innerHTML = '';
+                querySnapshot.forEach(doc => {
+                    const msg = doc.data();
+                    const date = msg.createdAt ? msg.createdAt.toDate().toLocaleDateString() : 'N/A';
+                    listEl.innerHTML += `<div class="card-bg p-4 rounded-lg"><div class="flex justify-between items-center mb-1"><h3 class="font-bold">${msg.title}</h3><p class="text-xs text-gray-400">${date}</p></div><p class="text-sm text-gray-300">${msg.message}</p></div>`;
+                });
+                if (currentUser) {
+                    await updateDoc(doc(db, "users", currentUser.uid), { lastNotificationCheck: serverTimestamp() });
+                    userData.lastNotificationCheck = serverTimestamp(); 
+                }
+            } catch (error) {
+                console.error("Error loading notifications:", error);
+                listEl.innerHTML = '<p class="text-red-400">Notifications load karne mein error aayi.</p>';
+            }
+        }
+
+        async function handleApplyReferralCode() {
+            if (!userData) return showAlert("User data abhi uplabdh nahi hai. Kripya phir se prayas karein.");
+            if (userData.referredBy) return showAlert("Aap pehle hi ek referral code istemal kar chuke hain.");
+            const codeInput = document.getElementById('enter-referral-code');
+            const code = codeInput.value.trim().toUpperCase();
+            if (!code) return showAlert("Kripya ek code daalein.");
+            if (code === userData.referralCode) return showAlert("Aap apna khud ka code istemal nahi kar sakte.");
+            loader.style.display = 'flex';
+            const referralBonusAmount = 100; 
+
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("referralCode", "==", code));
+            try {
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const referrerDoc = querySnapshot.docs[0];
+                    const referrerRef = doc(db, "users", referrerDoc.id);
+                    const referrerData = referrerDoc.data();
+
+                    await updateDoc(referrerRef, { balance: (referrerData.balance || 0) + referralBonusAmount });
+                    
+                    const newUserRef = doc(db, "users", currentUser.uid);
+                    await updateDoc(newUserRef, { balance: (userData.balance || 0) + referralBonusAmount, referredBy: code });
+                    
+                    userData.balance += referralBonusAmount; 
+                    userData.referredBy = code;
+                    updateUI();
+                    showAlert("Code safaltapoorvak apply ho gaya! Aapko 100 coins mile hain.");
+                } else {
+                    showAlert("Galat referral code.");
+                }
+            } catch(error) {
+                console.error("Error applying referral bonus: ", error);
+                showAlert("Code apply karte samay error aayi.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function updateBalance(amount) {
+            if (!currentUser || !userData) return;
+            const newBalance = (userData.balance || 0) + amount;
+            const userRef = doc(db, "users", currentUser.uid);
+            await updateDoc(userRef, { balance: newBalance });
+            userData.balance = newBalance; 
+            updateUI(); 
+        }
+
+        async function handleWithdrawal() {
+            if (!userData) return showAlert("User data abhi uplabdh nahi hai. Kripya phir se prayas karein.");
+            const amount = parseInt(document.getElementById('withdraw-amount').value);
+            const method = document.getElementById('withdraw-method').value;
+            const paymentDetailInput = document.getElementById('payment-detail-input');
+            const paymentDetail = paymentDetailInput ? paymentDetailInput.value.trim() : '';
+            const minWithdrawal = appConfig.minWithdrawal || 5000;
+
+            if (!amount || amount <= 0) return showAlert("Kripya valid amount daalein.");
+            if (amount < minWithdrawal) return showAlert(`Minimum withdrawal ${minWithdrawal} coins hai.`);
+            if (amount > userData.balance) return showAlert("Insufficient balance.");
+            if (!paymentDetail) return showAlert("Kripya payment detail daalein (UPI ID ya Paytm Number).");
+
+            loader.style.display = 'flex'; 
+            try {
+                await updateBalance(-amount); 
+                
+                showAlert("Withdrawal request safaltapoorvak submit ho gayi hai!");
+                document.getElementById('withdraw-amount').value = '';
+                if (paymentDetailInput) paymentDetailInput.value = '';
+            } catch (error) {
+                showAlert("Request submit karne mein error: " + error.message);
+                await updateBalance(amount); 
+            } finally {
+                loader.style.display = 'none'; 
+            }
+        }
+
+        function copyReferralCode() {
+            if (!referralCodeEl.textContent || referralCodeEl.textContent === 'LOADING...') {
+                return showAlert("Referral code abhi load nahi hua hai ya uplabdh nahi hai.");
+            }
+            const textToCopy = referralCodeEl.textContent;
+            const textArea = document.createElement("textarea");
+            textArea.style.position = 'fixed'; textArea.style.top = '-100px';
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.focus(); textArea.select();
+            try {
+                document.execCommand('copy');
+                showAlert("Referral code copy ho gaya!");
+            } catch (err) {
+                showAlert("Code copy karne mein problem aayi.");
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        // Helper function to copy text to clipboard and show an alert
+        function copyMessageToClipboard(textToCopy) {
+            const textArea = document.createElement("textarea");
+            textArea.style.position = 'fixed'; textArea.style.top = '-100px';
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showAlert("Message copy ho gaya! Ab aap ise Telegram, WhatsApp ya kahin bhi paste kar sakte hain.");
+            } catch (err) {
+                showAlert("Message copy karne mein problem aayi.");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Function to generate the share message and URL
+        function generateReferralShareContent() {
+            if (!userData || !userData.referralCode || userData.referralCode === 'LOADING...') {
+                showAlert("Referral code abhi load nahi hua hai ya uplabdh nahi hai. Kripya thoda intezaar karein.");
+                return null;
+            }
+            
+            // App Link will now be the Telegram bot link for sharing
+            const appOrWebsiteLink = "https://t.me/Satyam_ads_bot"; 
+            
+            return {
+                text: `Satyam Ads join karein aur paise kamayein! Bonus paane ke liye mera referral code use karein: *${userData.referralCode}*\n\nApp Link: ${appOrWebsiteLink}`, 
+                url: appOrWebsiteLink // Primary URL to be shared
+            };
+        }
+
+        // Generic Share function (for "Apna Code Share Karein" button)
+        function shareReferralCode() {
+            const shareContent = generateReferralShareContent();
+            if (!shareContent) return;
+
+            // Attempt to use the Web Share API first
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Satyam Ads Par Paise Kamayein!',
+                    text: shareContent.text,
+                    url: shareContent.url 
+                })
+                .then(() => console.log('Content shared successfully via Web Share API'))
+                .catch((error) => {
+                    console.error("Web Share failed:", error);
+                    showAlert("Share karne mein error aayi ya cancel ho gaya. Kripya message copy karke manually share karein.");
+                    copyMessageToClipboard(shareContent.text);
+                });
+            } else {
+                // Fallback for browsers/environments that do not support Web Share API
+                showAlert("Share option abhi uplabdh nahi hai. Kripya neeche diye gaye message ko copy karke manually share karein.");
+                copyMessageToClipboard(shareContent.text);
+            }
+        }
+
+        // Specific WhatsApp Share function
+        function shareViaWhatsApp() {
+            const shareContent = generateReferralShareContent();
+            if (!shareContent) return;
+
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareContent.text)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Specific Telegram Share function
+        function shareViaTelegram() {
+            const shareContent = generateReferralShareContent();
+            if (!shareContent) return;
+
+            // Telegram's general share link allows users to select chats/contacts
+            const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareContent.url)}&text=${encodeURIComponent(shareContent.text)}`;
+            window.open(telegramUrl, '_blank');
+        }
+
+        // Specific Instagram Share function (limited functionality from web)
+        function shareViaInstagram() {
+            const shareContent = generateReferralShareContent();
+            if (!shareContent) return;
+
+            // Instagram does not have a direct web API to pre-fill messages in DMs or posts and select recipients.
+            // The best approach is to copy the message to clipboard and guide the user.
+            copyMessageToClipboard(shareContent.text);
+            showAlert("Referral message copy ho gaya hai! Ab aap ise Instagram Direct Message ya post mein paste kar sakte hain.");
+        }
+
+
+        window.claimReward = async function(taskType) {
+            if (!currentUser || !userData) {
+                return showAlert("Task pura karne ke liye login karein.");
+            }
+
+            const userRef = doc(db, "users", currentUser.uid);
+            const dailyAdLimit = appConfig.dailyAdLimit || 10;
+            const now = new Date();
+            const currentDayUTC = now.toISOString().split('T')[0];
+            
+            let currentAdsWatchedToday = userData.adsWatchedToday || 0;
+            let totalAdsWatched = userData.totalAdsWatched || 0; 
+            const lastAdWatchTimestamp = userData.lastAdWatchTimestamp;
+
+            if (lastAdWatchTimestamp && lastAdWatchTimestamp.toDate) {
+                const lastWatchDate = lastAdWatchTimestamp.toDate();
+                const lastWatchDayUTC = lastWatchDate.toISOString().split('T')[0];
+                
+                if (lastWatchDayUTC !== currentDayUTC) {
+                    currentAdsWatchedToday = 0;
+                    console.log("Ad watch counter reset for new day.");
+                }
+            } else {
+                currentAdsWatchedToday = 0;
+            }
+
+            if (currentAdsWatchedToday >= dailyAdLimit) {
+                return showAlert("Aapki aaj ki ad dekhne ki seema poori ho gayi hai. Kal phir se try karein.");
+            }
+            
+            if (typeof window.show_9887286 !== 'function') {
+                return showAlert("Ad service abhi uplabdh nahi hai. Kripya baad mein prayas karein.");
+            }
+            
+            loader.style.display = 'flex';
+
+            let adPromise;
+            let rewardAmount = 0;
+
+            switch(taskType) {
+                case 'interstitial':
+                    adPromise = window.show_9887286();
+                    rewardAmount = appConfig.interstitialAdReward || 50;
+                    break;
+                case 'inApp':
+                    adPromise = window.show_9887286(); 
+                    rewardAmount = appConfig.inAppAdReward || 20;
+                    break;
+                case 'miniApp':
+                    adPromise = window.show_9887286();
+                    rewardAmount = appConfig.miniAppAdReward || 100;
+                    break;
+                default:
+                    loader.style.display = 'none';
+                    return;
+            }
+
+            adPromise.then(async () => {
+                const newAdsWatchedToday = currentAdsWatchedToday + 1;
+                const newTotalAdsWatched = totalAdsWatched + 1; 
+                
+                await updateDoc(userRef, { 
+                    adsWatchedToday: newAdsWatchedToday, 
+                    lastAdWatchTimestamp: serverTimestamp(),
+                    totalAdsWatched: newTotalAdsWatched 
+                });
+                
+                userData.adsWatchedToday = newAdsWatchedToday;
+                userData.lastAdWatchTimestamp = serverTimestamp(); 
+                userData.totalAdsWatched = newTotalAdsWatched; 
+
+                if (rewardAmount > 0) {
+                    await updateBalance(rewardAmount); 
+                    showAlert(`Badhai ho! Aapne ${rewardAmount} coins jeete hain.`);
+                }
+                updateAdsLeftCount(); 
+                updateUI(); 
+            }).catch(e => {
+                console.error("Ad error:", e);
+                showAlert('Ad nahi dikhaya ja saka. Kripya baad mein prayas karein.');
+            }).finally(() => {
+                loader.style.display = 'none'; 
+            });
+        }
+
+        function showAlert(message) {
+            document.getElementById('alert-message').textContent = message;
+            document.getElementById('custom-alert').classList.remove('hidden');
+            document.getElementById('alert-ok-btn').onclick = () => {
+                document.getElementById('custom-alert').classList.add('hidden');
+            };
+        }
+        window.showAlert = showAlert;
+
+    </script>
+</body>
+</html>
